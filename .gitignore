@@ -1,0 +1,19 @@
+# ignore everything
+*
+
+# .gitignore and README.md are to be spared
+!.gitignore
+!README.md
+# anything that is a dir
+!*/
+
+# python folder
+!python/project.ipynb
+!python/seeds_dataset.tsv
+!python/requirements.txt
+
+# tex folder
+!tex/GMM.tex
+!tex/GMM.bib
+!tex/GMM.pdf
+!tex/images/

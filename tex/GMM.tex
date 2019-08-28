@@ -1,0 +1,1052 @@
+\documentclass{report}
+\usepackage{bm, amssymb, mathtools}
+\usepackage{calrsfs}
+\usepackage{geometry}
+\usepackage{algorithm}
+\usepackage[breakable]{tcolorbox}
+\usepackage{upquote} % Upright quotes for verbatim code
+\usepackage{fancyvrb} % verbatim replacement that allows latex
+\usepackage{cite}
+\usepackage{url}
+\usepackage[english]{babel}
+% Basic figure setup, for now with no caption control since it's done
+% automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+\usepackage{graphicx}
+\graphicspath{{images/}}
+% Maintain compatibility with old templates. Remove in nbconvert 6.0
+\let\Oldincludegraphics\includegraphics
+% Ensure that by default, figures have no caption (until we provide a
+% proper Figure object with a Caption API and a way to capture that
+% in the conversion process - todo).
+\usepackage{caption}
+\usepackage[Export]{adjustbox} % Used to constrain images to a maximum size
+\adjustboxset{max size={0.9\linewidth}{0.9\paperheight}}
+    
+\addto{\captionsenglish}{%
+   \renewcommand{\bibname}{References}
+}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathAlphabet{\pazocal}{OMS}{zplm}{m}{n}
+
+% Exact colors from NB
+	\definecolor{incolor}{HTML}{303F9F}
+    \definecolor{outcolor}{HTML}{D84315}
+    \definecolor{cellborder}{HTML}{CFCFCF}
+    \definecolor{cellbackground}{HTML}{F7F7F7}
+    
+% prompt
+    \makeatletter
+    \newcommand{\boxspacing}{\kern\kvtcb@left@rule\kern\kvtcb@boxsep}
+    \makeatother
+    \newcommand{\prompt}[4]{
+        \ttfamily\llap{{\color{#2}[#3]:\hspace{3pt}#4}}\vspace{-\baselineskip}
+    }
+    
+% Pygments definitions
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\expandafter\def\csname PY@tok@w\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\expandafter\def\csname PY@tok@c\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.74,0.48,0.00}{##1}}}
+\expandafter\def\csname PY@tok@k\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\expandafter\def\csname PY@tok@o\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ow\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@nn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@ne\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.82,0.25,0.23}{##1}}}
+\expandafter\def\csname PY@tok@nv\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@no\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ni\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.60,0.60,0.60}{##1}}}
+\expandafter\def\csname PY@tok@na\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.49,0.56,0.16}{##1}}}
+\expandafter\def\csname PY@tok@nt\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@nd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\expandafter\def\csname PY@tok@s\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sd\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@si\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@se\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sr\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.40,0.53}{##1}}}
+\expandafter\def\csname PY@tok@ss\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sx\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@m\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@gh\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gu\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@gd\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.63,0.00}{##1}}}
+\expandafter\def\csname PY@tok@gr\endcsname{\def\PY@tc##1{\textcolor[rgb]{1.00,0.00,0.00}{##1}}}
+\expandafter\def\csname PY@tok@ge\endcsname{\let\PY@it=\textit}
+\expandafter\def\csname PY@tok@gs\endcsname{\let\PY@bf=\textbf}
+\expandafter\def\csname PY@tok@gp\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\expandafter\def\csname PY@tok@go\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.53,0.53,0.53}{##1}}}
+\expandafter\def\csname PY@tok@gt\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\expandafter\def\csname PY@tok@err\endcsname{\def\PY@bc##1{\setlength{\fboxsep}{0pt}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}
+\expandafter\def\csname PY@tok@kc\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kd\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kn\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@kr\endcsname{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@bp\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\expandafter\def\csname PY@tok@fm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\expandafter\def\csname PY@tok@vc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vg\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@vm\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\expandafter\def\csname PY@tok@sa\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sc\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@dl\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s2\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@sh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@s1\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\expandafter\def\csname PY@tok@mb\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mf\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mh\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mi\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@il\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@mo\endcsname{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\expandafter\def\csname PY@tok@ch\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cm\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cpf\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@c1\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+\expandafter\def\csname PY@tok@cs\endcsname{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.25,0.50,0.50}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+    
+% For linebreaks inside Verbatim environment from package fancyvrb. 
+    \makeatletter
+        \newbox\Wrappedcontinuationbox 
+        \newbox\Wrappedvisiblespacebox 
+        \newcommand*\Wrappedvisiblespace {\textcolor{red}{\textvisiblespace}} 
+        \newcommand*\Wrappedcontinuationsymbol {\textcolor{red}{\llap{\tiny$\m@th\hookrightarrow$}}} 
+        \newcommand*\Wrappedcontinuationindent {3ex } 
+        \newcommand*\Wrappedafterbreak {\kern\Wrappedcontinuationindent\copy\Wrappedcontinuationbox} 
+        % Take advantage of the already applied Pygments mark-up to insert 
+        % potential linebreaks for TeX processing. 
+        %        {, <, #, %, $, ' and ": go to next line. 
+        %        _, }, ^, &, >, - and ~: stay at end of broken line. 
+        % Use of \textquotesingle for straight quote. 
+        \newcommand*\Wrappedbreaksatspecials {% 
+            \def\PYGZus{\discretionary{\char`\_}{\Wrappedafterbreak}{\char`\_}}% 
+            \def\PYGZob{\discretionary{}{\Wrappedafterbreak\char`\{}{\char`\{}}% 
+            \def\PYGZcb{\discretionary{\char`\}}{\Wrappedafterbreak}{\char`\}}}% 
+            \def\PYGZca{\discretionary{\char`\^}{\Wrappedafterbreak}{\char`\^}}% 
+            \def\PYGZam{\discretionary{\char`\&}{\Wrappedafterbreak}{\char`\&}}% 
+            \def\PYGZlt{\discretionary{}{\Wrappedafterbreak\char`\<}{\char`\<}}% 
+            \def\PYGZgt{\discretionary{\char`\>}{\Wrappedafterbreak}{\char`\>}}% 
+            \def\PYGZsh{\discretionary{}{\Wrappedafterbreak\char`\#}{\char`\#}}% 
+            \def\PYGZpc{\discretionary{}{\Wrappedafterbreak\char`\%}{\char`\%}}% 
+            \def\PYGZdl{\discretionary{}{\Wrappedafterbreak\char`\$}{\char`\$}}% 
+            \def\PYGZhy{\discretionary{\char`\-}{\Wrappedafterbreak}{\char`\-}}% 
+            \def\PYGZsq{\discretionary{}{\Wrappedafterbreak\textquotesingle}{\textquotesingle}}% 
+            \def\PYGZdq{\discretionary{}{\Wrappedafterbreak\char`\"}{\char`\"}}% 
+            \def\PYGZti{\discretionary{\char`\~}{\Wrappedafterbreak}{\char`\~}}% 
+        } 
+        % Some characters . , ; ? ! / are not pygmentized. 
+        % This macro makes them "active" and they will insert potential linebreaks 
+        \newcommand*\Wrappedbreaksatpunct {% 
+            \lccode`\~`\.\lowercase{\def~}{\discretionary{\hbox{\char`\.}}{\Wrappedafterbreak}{\hbox{\char`\.}}}% 
+            \lccode`\~`\,\lowercase{\def~}{\discretionary{\hbox{\char`\,}}{\Wrappedafterbreak}{\hbox{\char`\,}}}% 
+            \lccode`\~`\;\lowercase{\def~}{\discretionary{\hbox{\char`\;}}{\Wrappedafterbreak}{\hbox{\char`\;}}}% 
+            \lccode`\~`\:\lowercase{\def~}{\discretionary{\hbox{\char`\:}}{\Wrappedafterbreak}{\hbox{\char`\:}}}% 
+            \lccode`\~`\?\lowercase{\def~}{\discretionary{\hbox{\char`\?}}{\Wrappedafterbreak}{\hbox{\char`\?}}}% 
+            \lccode`\~`\!\lowercase{\def~}{\discretionary{\hbox{\char`\!}}{\Wrappedafterbreak}{\hbox{\char`\!}}}% 
+            \lccode`\~`\/\lowercase{\def~}{\discretionary{\hbox{\char`\/}}{\Wrappedafterbreak}{\hbox{\char`\/}}}% 
+            \catcode`\.\active
+            \catcode`\,\active 
+            \catcode`\;\active
+            \catcode`\:\active
+            \catcode`\?\active
+            \catcode`\!\active
+            \catcode`\/\active 
+            \lccode`\~`\~ 	
+        }
+    \makeatother
+
+    \let\OriginalVerbatim=\Verbatim
+    \makeatletter
+    \renewcommand{\Verbatim}[1][1]{%
+        %\parskip\z@skip
+        \sbox\Wrappedcontinuationbox {\Wrappedcontinuationsymbol}%
+        \sbox\Wrappedvisiblespacebox {\FV@SetupFont\Wrappedvisiblespace}%
+        \def\FancyVerbFormatLine ##1{\hsize\linewidth
+            \vtop{\raggedright\hyphenpenalty\z@\exhyphenpenalty\z@
+                \doublehyphendemerits\z@\finalhyphendemerits\z@
+                \strut ##1\strut}%
+        }%
+        % If the linebreak is at a space, the latter will be displayed as visible
+        % space at end of first line, and a continuation symbol starts next line.
+        % Stretch/shrink are however usually zero for typewriter font.
+        \def\FV@Space {%
+            \nobreak\hskip\z@ plus\fontdimen3\font minus\fontdimen4\font
+            \discretionary{\copy\Wrappedvisiblespacebox}{\Wrappedafterbreak}
+            {\kern\fontdimen2\font}%
+        }%
+        
+        % Allow breaks at special characters using \PYG... macros.
+        \Wrappedbreaksatspecials
+        % Breaks at punctuation characters . , ; ? ! and / need catcode=\active 	
+        \OriginalVerbatim[#1,codes*=\Wrappedbreaksatpunct]%
+    }
+    \makeatother
+
+
+\begin{document}
+\title{Gaussian Mixture Models}
+\author{Paolo Lazzaroni}
+\date{August 2019}
+\maketitle
+
+\tableofcontents
+
+\begin{abstract}
+
+I metodi di clustering sono ampiamente usati per la loro capacità di sintetizzare grandi quantità di dati in gruppi, a volte come supporto per aiutare a comprendere la natura stessa dei dati e permettere una discriminazione dei dataset in questione e, altre volte per riuscire ad individuare outliers che potrebbero essere dannosi per la successiva trattazione con altri metodi o ancora veri e propri fenomeni da eliminare, come nell'applicazione di \textit{anomaly detection} -- ad esempio dei prodotti difettosi in una catena produttiva o componenti difettosi di macchinari.
+
+Il metodo più rinomato e semplice per fare clustering è il \textit{$K$-means}, ma discrimina immediatamente i dati in cluster senza dare informazioni di tipo probabilistico che potrebbero essere utili sia per verificare la veridicità dell'associazione a un cluster, sia per la generazione di dati dai cluster ottenuti. Per questo motivo il mio interesse va a spostarsi sui \textit{Gaussian Mixture Models} (GMM).
+
+Si introducono i fondamenti matematici che stanno dietro la tecnica e i modelli che permettono la massimizzazione della funzione di valutazione della stessa, per poi passare a un metodo iterativo per l'identificazione di soluzioni attraverso l'algoritmo EM, \textit{Expectation-Maximization}. Questa non è l'unica via per procedere ma è un buon metodo per mostrare, senza entrare troppo nel dettaglio, il metodo GMM.
+
+Si presenterà infine un'applicazione della tecnica al dataset \textit{Seeds} per valutarne le prestazioni e gli eventuali sviluppi.
+\end{abstract}
+
+\chapter{Clustering}
+\section{Introduzione}
+
+Il clustering è una tecnica di tipo \textit{non supervisionato} molto usata nel machine learning e data mining. Nelle tecniche non supervisionate cerchiamo di apprendere delle strutture interne ad un dataset e in questo caso, vogliamo potere raggruppare i dati e discriminarli in \textit{cluster}, così da ridurre le loro dimensioni e renderli più significativi. Il dataset $D$, in questo caso, si presenta composto da singoli sample $\bm{x}\in\mathbb{R}^M$ e non ha alcun tipo di target come, invece, succede nelle tecniche supervisionate. Il dataset quindi, se $N$ è il numero di sample che abbiamo
+\begin{equation}
+D = \{\bm{x}_n\}_{n=1,2,\cdots,N}
+\end{equation}
+
+\section{K-means}
+
+Per prima cosa andiamo a mostrare la tecnica più famosa e semplice utilizzata nel clustering, il \textit{K-Means}, visto che pone le basi per quelle più avanzate e, alle volte, è utilizzata per inizializzare altri metodi.
+
+\subsection{Idea di base}
+
+L'idea base del $K$-means è quella di sfruttare un vettore media per rappresentare i $K$ cluster $\bm\mu = (\bm\mu_1,\bm\mu_2,\cdots,\bm\mu_K)$ dove la media $k$-esima $\bm\mu_k$ rappresenta il centro del $k$-esimo cluster. Introduciamo inoltre un parametro $r_{nk} = \{0,1\}$ che avrà valore $r_{nk} = 1$ se $\bm{x}_n$ appartiene al $k$-esimo cluster e $r_{nk} = 0$ altrimenti. Possiamo allora esprimere la \textit{funzione obiettivo} come
+\begin{equation}
+J = \sum_{n=1}^{N}\sum_{k=1}^{K}r_{nk}||\bm{x}_n - \bm\mu_k||^2
+\end{equation}
+che rappresenta la somma quadra delle distanze tra i sample e i relativi centri di cluster.
+
+\subsection{Algoritmo EM per K-means}
+
+Possiamo, per minimizzare la quantità $J$, considerare l'algoritmo EM. L'acronimo di questo algoritmo sta per \textit{Expectation-Maximization}, che sono esattamente gli step che compie lo stesso nelle sue iterazioni. Nel caso particolare del $K$-means, partiamo con lo scegliere i valori $\bm\mu_k$ in modo randomico e aggiorniamo i valori degli $r_{nk}$ (E step)
+\begin{equation}
+r_{nk} = 
+  \begin{cases}
+    1 & \text{if $k = \argmin_j||\bm{x}_n - \bm\mu_j||^2$} \\
+    0 & \text{otherwise}
+  \end{cases}
+\end{equation}
+e di seguito i valori di $\bm\mu_k$ ottenuti minimizzando $J$ (M step)
+\begin{equation}
+\frac{dJ}{d\bm\mu_k} = 2\sum_{n=1}^{N}r_{nk}(\bm{x}_n - \bm\mu_k) = 0
+\end{equation}
+\begin{equation}
+\bm\mu_k = \frac{\sum_{n=1}^{N}r_{nk}\bm{x}_n}{\sum_{n=1}^{N}r_{nk}}
+\end{equation}
+iterativamente fino a convergenza. La convergenza è assicurata visto che ogni step riduce il valore di $J$, anche se potrebbe convergere in un minimo locale.
+
+\subsection{Considerazioni ed estensioni}
+
+Esistono molte considerazioni da fare su questo metodo per ottenere migliori risultati o estenderne l'utilizzo, visto che il $K$-means assume di ottiene cluster sferici, ben separati, con lo stesso volume ed aventi lo stesso numero di punti. Senza guardare nuove tecniche, possiamo fare diverse osservazioni:
+\begin{itemize}
+	\item Per velocizzare il processo di minimizzazione, solitamente, si possono scegliere valori iniziali dei $\bm\mu_k$ uguali a un subset randomico di $K$ punti appartenenti a $D$.
+	\item Abbiamo considerato una cosiddetta \textit{batch version} del $K$-means, ossia in cui utilizziamo tutti i dati assieme e, in alcune applicazioni, questo potrebbe non essere fattibile per questioni di tempo o perchè i dati arrivano non tutti assieme ma uno dopo l'altro nel tempo. Potremmo allora essere interessati a un aggiornamento di tipo on-line come
+	\begin{equation}
+	\bm\mu_k^{new} = \bm\mu_k^{old} + \eta_n(\bm{x}_n - \bm\mu_k^{old})
+	\end{equation}
+	dove $\eta_n$ è chiamato \textit{learning rate}.
+	\item L'algoritmo si mostra essere poco robusto agli outliers utilizzando la distanza euclidea. Si possono provare ad usare diverse distanze come, ad esempio, la \textit{distanza Manhattan} o la \textit{distanza Mahalanobis}.
+	\item L'algoritmo si può applicare, in questa forma, solo a dati quantitativi. Per estendere lo stesso a dati categorici, si può sostituire la distanza euclidea con una misura di dissimilarità $\pazocal{V}(\bm{x},\bm{x}')$. L'algorimo prende in questo caso il nome di \textit{$K$-medioids}.
+\end{itemize}
+
+La complessità di $K$-means è $O(KN)$.
+
+\section{EM per gaussian mixture models}
+
+Il $K$-means adopera un cosiddetto assegnamento ``forte" ai cluster trovati con l'algoritmo, ossia ogni punto è associato direttamente a un singolo cluster e non ha alcuna relazione con gli altri. Per alcuni problemi questa assunzione potrebbe essere scomoda o non dare abbastanza informazioni sulla natura dei dati presi in considerazione.
+
+L'algoritmo che andiamo ad analizzare ora, ossia EM applicato ai \textit{Gaussian Mixture Models} (GMM), opera un assegnamento "lasco" ai cluster, basandosi sulle probabilità a posteriori e restituendo un valore probabilistico di appartenenza a un cluster al posto di fare un assegnamento diretto senza ulteriori motivazioni. Questa via, oltre che permetterci di sviluppare modelli più complessi, restituisce anche più informazioni sui cluster, non solo la media, e sui dati stessi in relazione ad ogni cluster.
+
+\subsection{Gaussian mixture models}
+
+La \textit{distribuzione gaussiana} ha delle ottime proprietà analitiche e, per questo, è molto sfruttata nel mondo statistico. Ricordiamo che la forma della densità di probabilità $\pazocal{N}(\bm{x}|\bm\mu, \bm\Sigma)$ di una gaussiana multivariata, con $\bm{x}$ variabile casuale continua, media $\bm\mu$ e matrice di covarianza $\bm\Sigma$, ha la forma
+\begin{equation}
+\pazocal{N}(\bm{x}|\bm\mu, \bm\Sigma) = \frac{1}{(2\pi)^{D/2}}\frac{1}{|\bm\Sigma|^{1/2}}\exp\Big\{-\frac{1}{2}(\bm{x} - \bm\mu)^T\bm\Sigma^{-1}(\bm{x} - \bm\mu)\Big\}
+\end{equation}
+dove l'apice $^T$ indica la matrice o, in questo caso, il vettore trasposto.
+
+L'unico problema di questa distribuzione, quando andiamo a scontrarci con i dati del mondo reale, è che risulta essere molto limitata e semplificata rispetto al vero modello delle popolazioni. Da qui l'idea di unire l'utile al dilettevole con una \textit{mistura} di distribuzioni gaussiane. Un modello simile si può ottenere considerando la sovrapposizione di $K$ gaussiane, chiamate \textit{componenti} della mistura, ognuna con la sua media $\bm\mu_k$ e varianza $\bm\Sigma_k$, pesate da dei \textit{coefficienti di mistura} $\pi_k$ ottenendo la forma
+\begin{equation}\label{eq:mistura}
+p(\bm{x}) = \sum_{k=1}^{K} \pi_k\pazocal{N}(\bm{x}|\bm\mu_k, \bm\Sigma_k)
+\end{equation}
+
+Integrando l'equazione ottenuta per ambo i lati rispetto a $\bm{x}$ e ricordando che vale per la probabilità che $p(\bm{x}) \geq 0$ troviamo che
+\begin{equation}\label{eq:limitazione_somma}
+\sum_{k=1}^{K} \pi_k = 1
+\end{equation}
+e che
+\begin{equation}
+0 \leq \pi_k \leq 1
+\end{equation}
+per $k = 1,2,\cdots,K$.
+
+\subsection{Variabili latenti discrete}
+
+Per giustificare la successiva applicazione dell'algoritmo EM, facciamo uso di una diversa formulazione per la mistura di gaussiane secondo variabili discrete \textit{latenti}. Introduciamo una variabile binaria discreta $\bm{z}\in\mathbb{R}^K$ in cui un particolare elemento $z_k$ ha valore $1$ e tutti gli altri $0$ così da avere $z_j\in\{0,1\}$ con $j=1,2,\cdots,K$ e $\sum_j z_j = 1$.
+
+Vogliamo definire la distribuzione congiunta $p(\bm{x},\bm{z})$ e per questo ci servono la marginale $p(\bm{z})$ e la condizionata $p(\bm{x}|\bm{z})$. La distribuzione marginale di $\bm{z}$ è espressa rispetto ai coefficienti di mistura $\pi_k$ e, date le precedenti definizioni, possiamo scrivere
+\begin{equation}
+p(z_k=1) = \pi_k
+\end{equation}
+o equivalentemente
+\begin{equation}
+p(\bm{z}) = \prod_{k=1}^K \pi_k^{z_k}
+\end{equation}
+vista la rappresentazione \textit{one hot} di $\bm{z}$.
+
+La condizionata è invece rappresentabile come
+\begin{equation}
+p(\bm{x}|z_k=1) = \pazocal{N}(\bm{x}|\bm\mu_k, \bm\Sigma_k)
+\end{equation}
+o ancora
+\begin{equation}
+p(\bm{x}|\bm{z}) = \prod_{k=1}^K \pazocal{N}(\bm{x}|\bm\mu_k, \bm\Sigma_k)^{z_k}
+\end{equation}
+
+Da queste espressioni possiamo ricavare la congiunta come il prodotto $p(\bm{z})p(\bm{x}|\bm{z})$ e la marginale di $\bm{x}$ tramite il teorema della probabilità totale
+\begin{equation}
+p(\bm{x}) = \sum_{\bm{z}} p(\bm{z})p(\bm{x}|\bm{z}) = \sum_{k=1}^{K} \pi_k\pazocal{N}(\bm{x}|\bm\mu_k, \bm\Sigma_k)
+\end{equation}
+che è esattamente l'espressione della mistura di gaussiane considerata in \eqref{eq:mistura}.
+
+Prima di passare all'algoritmo, abbiamo bisogno di un'altra quantità che gioca un ruolo fondamentale nel modello, la probabilità condizionata di $\bm{z}$ dato $\bm{x}$. Il suo valore è dato dal teorema di Bayes
+\begin{equation}\label{eq:gamma}
+\begin{aligned}
+\gamma(z_k) \equiv p(z_k=1|\bm{x}) &= \frac{p(z_k=1)p(\bm{x}|z_k=1)}{\sum_{j=1}^K p(z_j=1)p(\bm{x}|z_j=1)}=\\
+&= \frac{\pi_k\pazocal{N}(\bm{x}|\bm\mu_k, \bm\Sigma_k)}{\sum_{j=1}^{K} \pi_j\pazocal{N}(\bm{x}|\bm\mu_j, \bm\Sigma_j)}
+\end{aligned}
+\end{equation}
+e queste quantità possono essere viste come la \textit{responsabilità} che il componente $k$ si prende per spiegare l'osservazione $\bm{x}$.
+
+Dobbiamo considerare le $\pi_k$ come le probabilità a priori di $z_k=1$ e le $\gamma(z_k)$ come le corrispondenti probabilità a posteriori data l'osservazione di $\bm{x}$.
+
+\subsection{Considerazioni sulla verosimiglianza}
+
+Supponiamo di avere delle osservazioni $\{\bm{x}_1,\bm{x}_2,\cdots,\bm{x}_N\}$ e vogliamo modellare questo dataset con una mistura di gaussiane. Avremo la matrice delle osservazioni $\bm{X}\in\mathbb{R}^{N\text{x}M}$, in cui l'$n$-esima riga è $\bm{x}_n^T$, e la matrice delle variabili latenti $\bm{Z}\in\mathbb{R}^{N\text{x}K}$, in cui l'$n$-esima riga è $\bm{z}_n^T$. Assumiamo anche che i dati siano stati presi in modo indipendente dalla distribuzione (i.i.d.). Il logaritmo della funzione di verosimiglianza è dato dall'espressione
+\begin{equation}
+\ln p(\bm{X}|\bm\pi,\bm\mu,\bm\Sigma) = \sum_{n=1}^N\ln\Bigg\{\sum_{k=1}^K\pi_k\pazocal{N}(\bm{x}|\bm\mu_j, \bm\Sigma_j)\Bigg\}
+\end{equation}
+
+Ci sono due importanti considerazioni da fare su questa funzione che ci spingono all'uso di tecniche diverse rispetto alla massimizzazione analitica della log verosimiglianza.
+
+Innanzitutto possono essere presenti delle singolarità. Si consideri il caso semplificato $\bm\Sigma_k = \sigma_k^2\bm{I}$, con $I$ matice identità delle appropriate dimensioni, che si può dimostrare valere anche per una matrice di covarianza generica. Supponiamo che la componente $j$-esima abbia la media uguale a un generico punto $n$-esimo del dataset $\bm\mu_j = \bm{x}_n$. Il contributo di questo punto sarà
+\begin{equation}
+\pazocal{N}(\bm{x}_n|\bm\mu_j=\bm{x}_n, \bm\Sigma_j=\sigma_j^2\bm{I}) = \frac{1}{(2\pi)^{1/2}}\frac{1}{\sigma_j}
+\end{equation}
+e vediamo facilmente che questo termine, se $\sigma_j \to 0$, andrà all'infinito.
+
+Un altro problema nel massimizzare la funzione di verosimiglianza sta nella complessità del problema. Una generica mistura di gaussiane con $K$ componenti avrà $K!$ soluzioni equivalenti, corrispondenti ai $K!$ modi di assegnare $K$ set di parametri a $K$ componenti. Inoltre è molto complesso massimizzare questa espressione a causa della somma su $k$ che appare all'interno del logaritmo, che non agisce più direttamente sulla gaussiana. Ponendo le derivate della log verosimiglianza a zero non troveremo più una soluzione chiusa.
+
+\subsection{Algoritmo EM per GMMs}
+
+Per massimizzare la log verosimiglianza, calcoliamo le derivate rispetto a $\bm\mu_k$ ottenendo
+\begin{equation}
+\begin{aligned}
+0 &= -\sum_{n=1}^N\frac{\pi_k\pazocal{N}(\bm{x}_n|\bm\mu_k, \bm\Sigma_k)}{\sum_j \pi_j\pazocal{N}(\bm{x}_n|\bm\mu_j, \bm\Sigma_j)}\bm\Sigma_k(\bm{x}_n - \bm\mu_k)\\
+&= -\sum_{n=1}^N\gamma(z_{nk})\bm\Sigma_k(\bm{x}_n - \bm\mu_k)
+\end{aligned}
+\end{equation}
+e, supponendo che la matrice di covarianza $\bm\Sigma_k$ non sia singolare, ricaviamo
+\begin{equation}
+\bm\mu_k = \frac{\sum_{n=1}^N\gamma(z_{nk})\bm{x}_n}{\sum_{n=1}^N\gamma(z_{nk})} = \frac{1}{N_k}\sum_{n=1}^N\gamma(z_{nk})\bm{x}_n
+\end{equation}
+dove possiamo interpretare $N_k$ come l'effettivo numero di punti assegnati al cluster $k$. Notiamo che la media $\bm\mu_k$ è ottenuta da una media pesata di tutti i punti $\bm{x}_n$ del dataset rispetto alle probabilità a posteriori $\gamma(z_{nk})$.
+
+Valutando le derivate della log verosimiglianza rispetto a $\bm\Sigma_k$ e usando simili passaggi, troviamo l'espressione
+\begin{equation}
+\bm\Sigma_k = \frac{1}{N_k}\sum_{n=1}^N\gamma(z_{nk})(\bm{x}_n - \bm\mu_k)(\bm{x}_n - \bm\mu_k)^T
+\end{equation}
+che è identica a quella della gaussiana standard ma pesata ancora secondo le probabilità a posteriori.
+
+Infine massimizziamo la log verosimiglianza rispetto ai coefficienti di mistura $\pi_k$. I coefficienti, però, sono sottoposti a delle limitazioni che abbiamo trovato nell'espressione \eqref{eq:limitazione_somma}. Dobbiamo allora modificare l'espressione, introducendo un moltiplicatore di Lagrange e massimizzare la seguente quantità
+\begin{equation}
+\ln p(\bm{X}|\bm\pi,\bm\mu,\bm\Sigma) + \lambda\Bigg(\sum_{k=1}^K\pi_k - 1\Bigg)
+\end{equation}
+ponendo la derivata uguale a zero
+\begin{equation}
+0 = \sum_{n=1}^N\frac{\pazocal{N}(\bm{x}_n|\bm\mu_k,\bm\Sigma_k)}{\sum_j \pi_j\pazocal{N}(\bm{x}_n|\bm\mu_j, \bm\Sigma_j)} + \lambda
+\end{equation}
+e con qualche passaggio
+\begin{equation}\label{eq:centrale_lambda}
+\begin{aligned}
+\lambda &= -\sum_{n=1}^N\frac{\pazocal{N}(\bm{x}_n|\bm\mu_k,\bm\Sigma_k)}{\sum_j \pi_j\pazocal{N}(\bm{x}_n|\bm\mu_j, \bm\Sigma_j)}\\
+\pi_k\lambda &= -\sum_{n=1}^N\frac{\pi_k\pazocal{N}(\bm{x}_n|\bm\mu_k,\bm\Sigma_k)}{\sum_j \pi_j\pazocal{N}(\bm{x}_n|\bm\mu_j, \bm\Sigma_j)} = -\sum_{n=1}^N\gamma(z_{nk}) = -N_k\\
+\sum_{k=1}^K\pi_k\lambda &= -\sum_{k=1}^K N_k = -N
+\end{aligned}
+\end{equation}
+e visto che la costrizione dice che $\sum_{k=1}^K\pi_k = 1$, allora si avrà $\lambda = -N$ che ci porta ad eliminare $\lambda$ e ottenere, tramite la \eqref{eq:centrale_lambda}
+\begin{equation}
+\pi_k = \frac{N_k}{N}
+\end{equation}
+che possiamo interpretare come la responsabilità media che ha il $k$-esimo componente nello spiegare i punti del dataset.
+
+Grazie a queste considerazioni abbiamo uno schema iterativo che possiamo utilizzare per l'algoritmo EM. Si noti che queste espressioni non danno una soluzione chiusa, visto che le $\gamma(z_{nk})$ dipendono a loro volta dai parametri $\pi_k$, $\bm\mu_k$ e $\bm\Sigma_k$ in modo molto complesso come da \eqref{eq:gamma}.
+
+Gli step dell'algoritmo sono riportati nell'algoritmo $1$ in pagina successiva.
+\begin{algorithm}\label{algoritmo}
+\caption{Algoritmo EM per GMMs}
+\begin{enumerate}
+\item Inizializzare le medie $\bm\mu_k$, le matrici di covarianza $\bm\Sigma_k$ e i coefficienti di mistura $\pi_k$ e valutare il valore iniziale della log verosimiglianza.
+
+\item Valutare le responsabilità con i parametri correnti (E step)
+\begin{equation}
+\gamma(z_k) = \frac{\pi_k\pazocal{N}(\bm{x}|\bm\mu_k, \bm\Sigma_k)}{\sum_{j=1}^{K} \pi_j\pazocal{N}(\bm{x}|\bm\mu_j, \bm\Sigma_j)}.
+\end{equation}
+
+\item Stimare i nuovi parametri usando le responsabilità trovate
+\begin{equation}
+\bm\mu_k^{\text{new}} = \frac{1}{N_k}\sum_{n=1}^N\gamma(z_{nk})\bm{x}_n
+\end{equation}
+\begin{equation}
+\bm\Sigma_k^{\text{new}} = \frac{1}{N_k}\sum_{n=1}^N\gamma(z_{nk})(\bm{x}_n - \bm\mu_k^{\text{new}})(\bm{x}_n - \bm\mu_k^{\text{new}})^T
+\end{equation}
+\begin{equation}
+\pi_k^{\text{new}} = \frac{N_k}{N}
+\end{equation}
+dove
+\begin{equation}
+N_k = \sum_{n=1}^N\gamma(z_{nk}).
+\end{equation}
+
+\item Valutare la log verosimiglianza
+\begin{equation}
+\ln p(\bm{X}|\bm\pi,\bm\mu,\bm\Sigma) = \sum_{n=1}^N\ln\Bigg\{\sum_{k=1}^K\pi_k\pazocal{N}(\bm{x}|\bm\mu_j, \bm\Sigma_j)\Bigg\}
+\end{equation}
+e controllare la convergenza dei parametri o della log verosimiglianza. Se la convergenza non è stata raggiunta, ritornare allo step $2$.
+\end{enumerate}
+\end{algorithm}
+
+\chapter{Caso di studio}\label{caso di studio}
+
+
+\section{Introduzione}\label{introduzione}
+
+Il problema posto dal caso di studio che andiamo a considerare è quello
+di una classificazione di 3 tipi di grano (Kama, Rosa e Canadian)
+secondo delle misurazioni fatte sulle proprietà geometriche e
+strutturali dei chicchi tramite tecniche di ``soft X-rays''. Si
+tratta di un problema prettamente di classificazione, ma anche tecniche
+di clustering possono dare informazioni ed essere utili alle fasi
+successive.
+
+Per aiutarci nell'analisi del dataset e nello sviluppo del modello GMM,
+si è scelto Python come linguaggio di programmazione data la sua
+versatilità e la quantità (e qualità) di librerie dedicate all'algebra,
+allo studio di dataset tramite machine learning e alla visualizzazione
+dei dati.
+
+\section{Il dataset}\label{il-dataset}
+
+Il dataset ``Seeds'' contiene un totale di \(N=210\) elementi di
+dimensione \(M=7\) ognuno, più la label del tipo di grano identificato
+dal vettore. Abbiamo quindi
+\(\boldsymbol{X}\in\mathbb{R}^{210\text{x}7}\). Visto che stiamo
+applicando tecniche di clustering, metodo non supervisionato, non ci
+interessa la label, se non per le considerazioni finali, ma vogliamo
+ottenere delle strutture che saranno di supporto nell'analisi del
+dataset.
+
+I sample hanno i seguenti attributi:
+\begin{enumerate}
+\item Area \(A\)
+\item Perimetro \(P\)
+\item Compattezza, calcolata come \(C = \frac{4\pi A}{P^2}\)
+\item Lunghezza del chicco
+\item Larghezza del chicco
+\item Coefficiente di asimmetria
+\item Lunghezza dell'incavo del chicco
+\end{enumerate}
+ognuno dei quali è un numero appartenente ai reali, come già specificato
+sopra.
+
+\section{Visualizzazione del dataset}\label{visualizzazione-del-dataset}
+
+Visto che il dataset è composto da elementi in \(\mathbb{R}^7\) non
+possiamo visualizzarlo direttamente, ma dobbiamo prima applicare allo
+stesso \emph{tecniche di visualizzazione}. Vogliamo visualizzare i dati
+in uno spazio \(\mathbb{R}^2\) e, per farlo, sono state scelte la
+tecniche più tipiche: il \emph{MultiDimensional Scaling} (MDS), che
+assicura che punti vicini nello spazio originario siano vicini anche
+nello spazio di dimensione ridotta, e il \emph{Principal Component
+Analysis} (PCA), che proietta i dati in nuove direzioni, ordinate
+secondo la loro varianza spiegata, e da cui noi preleviamo tante
+direzioni quante dimensioni vogliamo.
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{1}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{k+kn}{import} \PY{n+nn}{numpy} \PY{k}{as} \PY{n+nn}{np}
+\PY{k+kn}{from} \PY{n+nn}{scipy} \PY{k}{import} \PY{n}{linalg}
+
+\PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{pyplot} \PY{k}{as} \PY{n+nn}{plt}
+\PY{k+kn}{from} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{patches} \PY{k}{import} \PY{n}{Ellipse}
+\PY{k+kn}{import} \PY{n+nn}{matplotlib}\PY{n+nn}{.}\PY{n+nn}{colors} \PY{k}{as} \PY{n+nn}{pltcolors}
+
+\PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{preprocessing} \PY{k}{import} \PY{n}{StandardScaler}
+\PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{manifold} \PY{k}{import} \PY{n}{MDS}
+\PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{decomposition} \PY{k}{import} \PY{n}{PCA}
+\PY{k+kn}{from} \PY{n+nn}{sklearn}\PY{n+nn}{.}\PY{n+nn}{mixture} \PY{k}{import} \PY{n}{GaussianMixture}
+
+\PY{n}{D} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{genfromtxt}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{seeds\PYZus{}dataset.tsv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{delimiter}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}t}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{X} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{delete}\PY{p}{(}\PY{n}{D}\PY{p}{,}\PY{l+m+mi}{7}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{)} \PY{c+c1}{\PYZsh{}rimozione della label}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{N =}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{X}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{, M =}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{X}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+N = 210 , M = 7
+    \end{Verbatim}
+
+    Innanzitutto un po' di \emph{preprocessing} sui dati. Normalizziamoli
+per ottenere migliori risultati nelle fasi successive e avere
+informazioni sulla media e la varianza dei dati di partenza
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{2}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{seed} \PY{o}{=} \PY{l+m+mi}{42}
+\PY{n}{np}\PY{o}{.}\PY{n}{random}\PY{o}{.}\PY{n}{seed}\PY{p}{(}\PY{n}{seed}\PY{p}{)} \PY{c+c1}{\PYZsh{}per la riproduzione dei risultati}
+\PY{n}{scaler} \PY{o}{=} \PY{n}{StandardScaler}\PY{p}{(}\PY{p}{)}
+\PY{n}{X\PYZus{}norm} \PY{o}{=} \PY{n}{scaler}\PY{o}{.}\PY{n}{fit\PYZus{}transform}\PY{p}{(}\PY{n}{X}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mean:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{scaler}\PY{o}{.}\PY{n}{mean\PYZus{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{Variance:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{scaler}\PY{o}{.}\PY{n}{var\PYZus{}}\PY{p}{)}
+\PY{k}{with} \PY{n}{np}\PY{o}{.}\PY{n}{printoptions}\PY{p}{(}\PY{n}{suppress}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}\PY{p}{:} \PY{c+c1}{\PYZsh{}solo per visualizzare 0 invece di numeri infinitesimi}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Normalised mean:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{X\PYZus{}norm}\PY{o}{.}\PY{n}{mean}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{Normalised variance:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{X\PYZus{}norm}\PY{o}{.}\PY{n}{var}\PY{p}{(}\PY{n}{axis}\PY{o}{=}\PY{l+m+mi}{0}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Mean: [14.84752381 14.55928571  0.87099857  5.62853333  3.25860476  3.70020095
+  5.40807143]
+Variance: [8.42603482e+00 1.69740663e+00 5.55690522e-04 1.95370458e-01
+ 1.41988830e-01 2.24991888e+00 2.40402828e-01]
+Normalised mean: [-0. -0.  0. -0. -0.  0. -0.]
+Normalised variance: [1. 1. 1. 1. 1. 1. 1.]
+    \end{Verbatim}
+
+    Per quanto riguarda MDS, non usiamo i dati normalizzati, dato che ci
+servono le distanze vere tra gli stessi per ottenere una corretta
+rappresentazione in uno spazio di minori dimensioni. I dati verranno
+solo centrati dalla procedura stessa
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{3}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{embedding} \PY{o}{=} \PY{n}{MDS}\PY{p}{(}\PY{n}{n\PYZus{}components}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{n}{seed}\PY{p}{)}
+\PY{n}{X\PYZus{}transformed} \PY{o}{=} \PY{n}{embedding}\PY{o}{.}\PY{n}{fit\PYZus{}transform}\PY{p}{(}\PY{n}{X}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{N =}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{X\PYZus{}transformed}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{, M =}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{X\PYZus{}transformed}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+N = 210 , M = 2
+    \end{Verbatim}
+
+    Come vediamo il dataset è stato ridotto a vettori bidimensionali.
+
+Il valore di stress finale dell'MDS, ossia la somma degli errori
+quadratici tra la distanza effettiva dei punti nello spazio di partenza
+e i punti ottenuti dalla trasformazione nello spazio ridotto, ottenuto
+come
+
+\(stress(\boldsymbol{x}_1,\boldsymbol{x}_2,\cdots,\boldsymbol{x}_N) = \sqrt{\sum_{i \neq j=1,2,\cdots,N}(d_{ij} - ||\boldsymbol{x}_i - \boldsymbol{x}_j||)^2}\)
+
+è pari a
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{4}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Stress:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{embedding}\PY{o}{.}\PY{n}{stress\PYZus{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Stress: 53.10153547772634
+    \end{Verbatim}
+
+    Visualizzando
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{5}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{scatter}\PY{p}{(}\PY{n}{X\PYZus{}transformed}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}\PY{n}{X\PYZus{}transformed}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Data MDS}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{n}{loc}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{best}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Component 1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Component 2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{MDS}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+\begin{center}
+    \adjustimage{max size={0.5\linewidth}{0.5\paperheight}}{output_9_0}
+    \begin{figure}[h!]
+    \caption{Visualizzazione del dataset dopo la riduzione a 2D tramite MDS.}
+    \end{figure}
+\end{center}
+    
+    sembrano effettivamente esserci alcune agglomerazioni di dati. A priori
+non sappiamo quanti cluster ci siano effettivamente, quindi dovremo
+provare diversi valori per \(K\) nell'implementazione di un GMM.
+
+Altro modo per visualizzare i dati in uno spazio ridotto è sfruttare
+PCA. Sfrutteremo, in questo caso, i dati normalizzati. Per la
+visualizzazione preleveremo le prime due componenti ottenute dal PCA e
+vediamo che la percentuale di varianza spiegata delle stesse è
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{6}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{pca} \PY{o}{=} \PY{n}{PCA}\PY{p}{(}\PY{n}{n\PYZus{}components}\PY{o}{=}\PY{l+m+mi}{2}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{n}{seed}\PY{p}{)}
+\PY{n}{X\PYZus{}transformedPCA} \PY{o}{=} \PY{n}{pca}\PY{o}{.}\PY{n}{fit\PYZus{}transform}\PY{p}{(}\PY{n}{X\PYZus{}norm}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Explained variance ratio for}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{Component 1:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+      \PY{n}{pca}\PY{o}{.}\PY{n}{explained\PYZus{}variance\PYZus{}ratio\PYZus{}}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+      \PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{Component 2:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+      \PY{n}{pca}\PY{o}{.}\PY{n}{explained\PYZus{}variance\PYZus{}ratio\PYZus{}}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Total explained variance:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{n}{pca}\PY{o}{.}\PY{n}{explained\PYZus{}variance\PYZus{}ratio\PYZus{}}\PY{p}{)}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Explained variance ratio for
+Component 1: 0.7187430265675441
+Component 2: 0.1710818352815798
+Total explained variance: 0.8898248618491239
+    \end{Verbatim}
+
+    circa \(0.89\%\). Riteniamo quindi una buona percentuale della varianza
+totale del dataset, anche se una componente in più non farebbe male. Per
+semplicità ci limitiamo a visualizzare i dati in uno spazio 2D.
+
+Queste \emph{riduzioni di dimensionalità} dei dati potrebbero tornare
+utili come fase di \emph{preprocessing} per l'eventuale successiva
+classificazione, se fosse quello lo scopo dell'analisi, per semplificare
+i dati stessi in input al metodo di classificazione scelto e velocizzare
+quindi la fase di \emph{training}.
+
+Visualizzando i dati ottenuti tramite PCA
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{7}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n}{fig} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{scatter}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Data PCA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{n}{loc}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{best}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Component 1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Component 2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PCA}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+\clearpage
+\begin{center}
+    \adjustimage{max size={0.5\linewidth}{0.5\paperheight}}{output_13_0.png}
+    \begin{figure}[h!]
+    \caption{Visualizzazione del dataset dopo la riduzione a 2D tramite PCA.}
+    \end{figure}
+\end{center}
+    
+    possiamo anche qui notare diverse agglomerazioni di dati il che, ancora
+una volta, giustificano l'applicazione di un metodo di clustering.
+
+Dopo questa prima analisi visiva, soprattutto aiutata da PCA, e
+basandoci sulle sezioni dello spazio 2D in cui più dati sono
+agglomerati, sembrerebbe che i cluster siano 2, 3 o 4. Teniamo questi
+numeri per \(K\) per evitare di fare \emph{overfitting} sul dataset che
+stiamo valutando. Potremmo infatti, potenzialmente, avere \(K=N\) ma non
+avrebbe più senso fare clustering a quel punto.
+
+\section{Applicazione di GMM sul dataset}\label{applicazione-di-gmm-sul-dataset}
+
+Applicheremo GMM prima sul dataset originario e poi su quello ottenuto
+con la PCA per la visualizzazione e vedremo di comparare i risultati
+ottenuti. Per inizializzare i centri del GMM utilizzeremo \(K\)-means,
+come è di default nell'implementazione usata da scikit-learn.
+
+
+\subsection{Senza preprocessing}\label{senza-preprocessing}
+
+Partiamo con GMM sul dataset iniziale senza preprocessing (i valori
+della likelihood non sono stampati per mantenere ordine, ma sono stati
+valutati e si arriva a convergenza in massimo 30 step, nel caso \(K=2\))
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{8}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{NO PREPROCESSING}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{min\PYZus{}k} \PY{o}{=} \PY{l+m+mi}{2}
+\PY{n}{max\PYZus{}k} \PY{o}{=} \PY{l+m+mi}{4}
+\PY{n}{gmm\PYZus{}np} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+\PY{n}{gmm\PYZus{}np\PYZus{}pred} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+\PY{n}{gmm\PYZus{}np\PYZus{}count} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+\PY{k}{for} \PY{n}{k} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{min\PYZus{}k}\PY{p}{,} \PY{n}{max\PYZus{}k}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
+    \PY{n}{idx} \PY{o}{=} \PY{n}{k} \PY{o}{\PYZhy{}} \PY{n}{min\PYZus{}k} \PY{o}{+} \PY{l+m+mi}{1}
+    \PY{n}{gmm\PYZus{}np}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{=} \PY{n}{GaussianMixture}\PY{p}{(}\PY{n}{n\PYZus{}components}\PY{o}{=}\PY{n}{k}\PY{p}{,} \PY{n}{covariance\PYZus{}type}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{full}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+                         \PY{n}{max\PYZus{}iter}\PY{o}{=}\PY{l+m+mi}{100}\PY{p}{,} \PY{n}{init\PYZus{}params}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{kmeans}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{n}{seed}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{X}\PY{p}{)}
+    \PY{n}{gmm\PYZus{}np\PYZus{}pred}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{=} \PY{n}{gmm\PYZus{}np}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{X}\PY{p}{)}
+    \PY{n}{unique}\PY{p}{,} \PY{n}{count} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{unique}\PY{p}{(}\PY{n}{gmm\PYZus{}np\PYZus{}pred}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{return\PYZus{}counts}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+    \PY{n}{gmm\PYZus{}np\PYZus{}count}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{=} \PY{n+nb}{list}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{unique}\PY{p}{,} \PY{n}{count}\PY{p}{)}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{k =}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{k}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AIC:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm\PYZus{}np}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{aic}\PY{p}{(}\PY{n}{X}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{, BIC:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm\PYZus{}np}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{bic}\PY{p}{(}\PY{n}{X}\PY{p}{)}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Points per cluster: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm\PYZus{}np\PYZus{}count}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Weights:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm\PYZus{}np}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{weights\PYZus{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{Means:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm\PYZus{}np}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{means\PYZus{}}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{=======================================================================}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+NO PREPROCESSING
+
+k = 2
+AIC: -1988.8331477876472 , BIC: -1751.188513106707
+Points per cluster:  [(0, 102), (1, 108)]
+Weights: [0.48265305 0.51734695]
+Means: [[17.40618519 15.70345836  0.88454536  5.99069092  3.58928249  3.29082613
+   5.77073561]
+ [12.46044928 13.49184264  0.85836024  5.29066246  2.95010267  4.08212261
+   5.06972793]]
+=======================================================================
+k = 3
+AIC: -2259.187097621821 , BIC: -1901.046591835052
+Points per cluster:  [(0, 67), (1, 67), (2, 76)]
+Weights: [0.31763136 0.3203806  0.36198804]
+Means: [[18.51039381 16.20696129  0.88460422  6.17017178  3.70118352  3.60902317
+   6.03105877]
+ [14.55627613 14.41021924  0.88009292  5.55125457  3.26967863  2.74788125
+   5.14819356]
+ [11.89125956 13.24544275  0.85101108  5.22166148  2.86045694  4.62306483
+   5.09142977]]
+=======================================================================
+k = 4
+AIC: -2347.0556905356843 , BIC: -1868.4193136430863
+Points per cluster:  [(0, 53), (1, 27), (2, 70), (3, 60)]
+Weights: [0.25562666 0.1253162  0.33526982 0.28378732]
+Means: [[18.96799697 16.39606991  0.88625382  6.23953925  3.75066838  3.51617876
+   6.09896161]
+ [13.33399908 13.83730872  0.87501339  5.36719331  3.11833176  2.82562929
+   4.93322424]
+ [11.82166682 13.22505197  0.84867139  5.2245273   2.84411408  4.73137865
+   5.10952861]
+ [15.37906595 14.79986278  0.88186185  5.67085999  3.36699621  3.033914
+   5.34812688]]
+=======================================================================
+    \end{Verbatim}
+
+    Secondo AIC il migliore modello è quello con \(K=4\), mentre secondo BIC
+quello con \(K=3\). Il modello con \(K=2\) sembra non spiegare il
+dataset come gli altri due.
+
+Guardando alla mistura ottenuta con i valori \(K=3\), i pesi delle 3
+gaussiane sono simili, non esiste quindi una gaussiana che pesa molto di
+più delle altre. Nella mistura con \(K=4\) la prima gaussiana pesa più
+di due volte rispetto alla quarta, ma anche qui non esistono grossi
+scompensi.
+
+Dopo queste considerazioni si potrebbe dire che sono entrambi buoni
+modelli e la scelta tra i due potrebbe essere dettata dalla preferenza
+tra il criterio AIC e quello BIC oppure dal grado di complessità del
+modello di uscita (BIC predilige modelli meno complessi rispetto ad AIC,
+per questo sceglie \(K=3\)).
+
+Anche se non stiamo facendo classificazione, visto che abbiamo la label
+nel dataset di partenza, vediamo quanti elementi effettivamente della
+stessa specie sono stati raggruppati nello stesso cluster per GMM con
+\(K=3\). Visualizzando i vettori osserviamo che
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{9}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{}print(D[:,7],\PYZsq{}\PYZbs{}n\PYZsq{},gmm\PYZus{}np\PYZus{}pred[3]) \PYZsh{}commentato per leggibilità}
+\PY{c+c1}{\PYZsh{}dal comando si vede la corrispondenza di cluster\PYZhy{}\PYZgt{}label: 0\PYZhy{}\PYZgt{}2, 1\PYZhy{}\PYZgt{}1,2\PYZhy{}\PYZgt{}3 }
+\PY{c+c1}{\PYZsh{}mappiamo quindi i risultati}
+\PY{n}{res\PYZus{}np} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{n}{gmm\PYZus{}np\PYZus{}pred}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{)}
+\PY{n}{replacements\PYZus{}np} \PY{o}{=} \PY{p}{\PYZob{}}\PY{l+m+mi}{0}\PY{p}{:} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{:} \PY{l+m+mi}{3}\PY{p}{\PYZcb{}}
+\PY{n}{new\PYZus{}np} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{zeros}\PY{p}{(}\PY{n}{res\PYZus{}np}\PY{o}{.}\PY{n}{shape}\PY{p}{)}
+\PY{k}{for} \PY{n}{idx}\PY{p}{,} \PY{n}{e} \PY{o+ow}{in} \PY{n}{replacements\PYZus{}np}\PY{o}{.}\PY{n}{items}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+    \PY{n}{new\PYZus{}np}\PY{p}{[}\PY{n}{res\PYZus{}np} \PY{o}{==} \PY{n}{idx}\PY{p}{]} \PY{o}{=} \PY{n}{e}
+    
+\PY{c+c1}{\PYZsh{}calcolo del numero di elementi uguali}
+\PY{n}{eq\PYZus{}np} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{where}\PY{p}{(}\PY{n}{new\PYZus{}np} \PY{o}{==} \PY{n}{D}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{7}\PY{p}{]}\PY{p}{,} \PY{l+m+mf}{1.}\PY{p}{,} \PY{l+m+mf}{0.}\PY{p}{)}
+\PY{n}{ratio\PYZus{}correct\PYZus{}np} \PY{o}{=} \PY{n}{eq\PYZus{}np}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}\PY{o}{/}\PY{n}{eq\PYZus{}np}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Ratio of cluster elements of same seed kind:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{ratio\PYZus{}correct\PYZus{}np}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Ratio of cluster elements of same seed kind: 0.9285714285714286
+    \end{Verbatim}
+
+    effettivamente i cluster formati sono significativi per identificare lo
+stesso tipo di seme, con l'\(92.9\%\) di elementi contenuti nei cluster
+che sono effettivamente dello stesso tipo di seme. Questa considerazione
+non ha senso nel clustering, ma mostra in modo inequivocabile che i
+cluster sono significativi per riassumere i dati.
+
+Per fare le stesse valutazioni su GMM con \(K\geq4\) dovremmo decidere
+quali cluster unire sotto una singola label, ma eviteremo di farlo in
+questa trattazione.
+
+\subsection{Con preprocessing}\label{con-preprocessing}
+
+Ora sfruttiamo i dati preprocessati con PCA e vediamo se la situazione
+cambia (i valori della likelihood non sono stampati per mantenere
+ordine, ma sono stati valutati e si arriva a convergenza in massimo 8
+step, nel caso \(K=4\))
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{10}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{WITH PREPROCESSING}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{min\PYZus{}k} \PY{o}{=} \PY{l+m+mi}{2}
+\PY{n}{max\PYZus{}k} \PY{o}{=} \PY{l+m+mi}{4}
+\PY{n}{gmm} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+\PY{n}{gmm\PYZus{}pred} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+\PY{n}{gmm\PYZus{}count} \PY{o}{=} \PY{p}{\PYZob{}}\PY{p}{\PYZcb{}}
+\PY{k}{for} \PY{n}{k} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{n}{min\PYZus{}k}\PY{p}{,} \PY{n}{max\PYZus{}k}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{)}\PY{p}{:}
+    \PY{n}{idx} \PY{o}{=} \PY{n}{k} \PY{o}{\PYZhy{}} \PY{n}{min\PYZus{}k} \PY{o}{+} \PY{l+m+mi}{1}
+    \PY{n}{gmm}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{=} \PY{n}{GaussianMixture}\PY{p}{(}\PY{n}{n\PYZus{}components}\PY{o}{=}\PY{n}{k}\PY{p}{,} \PY{n}{covariance\PYZus{}type}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{full}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}
+                         \PY{n}{max\PYZus{}iter}\PY{o}{=}\PY{l+m+mi}{100}\PY{p}{,} \PY{n}{init\PYZus{}params}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{kmeans}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{random\PYZus{}state}\PY{o}{=}\PY{n}{seed}\PY{p}{)}\PY{o}{.}\PY{n}{fit}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{)}
+    \PY{n}{gmm\PYZus{}pred}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{=} \PY{n}{gmm}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{predict}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{)}
+    \PY{n}{unique}\PY{p}{,} \PY{n}{count} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{unique}\PY{p}{(}\PY{n}{gmm\PYZus{}pred}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{,} \PY{n}{return\PYZus{}counts}\PY{o}{=}\PY{k+kc}{True}\PY{p}{)}
+    \PY{n}{gmm\PYZus{}count}\PY{p}{[}\PY{n}{k}\PY{p}{]} \PY{o}{=} \PY{n+nb}{list}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{unique}\PY{p}{,} \PY{n}{count}\PY{p}{)}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{k =}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{k}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{AIC:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{aic}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{)}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{, BIC:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{bic}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{)}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Points per cluster: }\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm\PYZus{}count}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Weights:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{weights\PYZus{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+se}{\PYZbs{}n}\PY{l+s+s1}{Means:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{n}{k}\PY{p}{]}\PY{o}{.}\PY{n}{means\PYZus{}}\PY{p}{)}
+    \PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{=======================================================================}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+WITH PREPROCESSING
+
+k = 2
+AIC: 1467.1068015923533 , BIC: 1503.9249844302456
+Points per cluster:  [(0, 75), (1, 135)]
+Weights: [0.36827641 0.63172359]
+Means: [[ 2.51464923 -0.32586688]
+ [-1.46596707  0.18997087]]
+=======================================================================
+k = 3
+AIC: 1450.0400427000686 , BIC: 1506.9408707222656
+Points per cluster:  [(0, 67), (1, 73), (2, 70)]
+Weights: [0.31611865 0.33520855 0.3486728 ]
+Means: [[ 2.79449827 -0.40445368]
+ [-2.31736537 -0.62684562]
+ [-0.30570874  0.96933101]]
+=======================================================================
+k = 4
+AIC: 1434.5947392844857 , BIC: 1511.5782124909874
+Points per cluster:  [(0, 47), (1, 66), (2, 72), (3, 25)]
+Weights: [0.22887704 0.32186758 0.33803518 0.1112202 ]
+Means: [[ 3.25554294 -0.35453288]
+ [-2.31689057 -0.70909697]
+ [-0.41250559  1.12929811]
+ [ 1.2592526  -0.65062577]]
+=======================================================================
+    \end{Verbatim}
+
+    La situazione è cambiata. Il criterio AIC sceglie ancora \(K=4\), ma il
+criterio BIC sceglie \(K=2\), anche se i valori di questo criterio sono
+molto simili per tutti i valori di \(K\) considerati.
+
+Guardando ai valori dei coefficienti di mistura vediamo che per \(K=2\)
+la prima gaussiana pesa \(1.6\) volte di più rispetto alla seconda, sono
+circa equiprobabili con \(\pi_k\approx\frac{1}{3}\) per \(K=3\) e per
+\(K=4\) abbiamo valori non troppo significativi a prima vista, come
+prima, senza nessuna gaussiana molto più grande di altre, ma la seconda
+che pesa il doppio della terza.
+
+Consideriamo allora tutte e 3 le casistiche stavolta riportando i
+risultati ottenuti in grafici
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{11}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{}per plottare i risultati ottenuti}
+\PY{c+c1}{\PYZsh{} (ispirato a https://scikit\PYZhy{}learn.org/stable/auto\PYZus{}examples/mixture/plot\PYZus{}gmm.html)}
+\PY{n}{colors} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{red}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{blue}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{green}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{gold}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+
+\PY{k}{def} \PY{n+nf}{plot\PYZus{}results}\PY{p}{(}\PY{n}{X}\PY{p}{,} \PY{n}{Y\PYZus{}pred}\PY{p}{,} \PY{n}{means}\PY{p}{,} \PY{n}{covariances}\PY{p}{,} \PY{n}{ax}\PY{p}{,} \PY{n}{title}\PY{p}{)}\PY{p}{:}
+    \PY{k}{for} \PY{n}{i}\PY{p}{,} \PY{p}{(}\PY{n}{mean}\PY{p}{,} \PY{n}{covar}\PY{p}{,} \PY{n}{color}\PY{p}{)} \PY{o+ow}{in} \PY{n+nb}{enumerate}\PY{p}{(}\PY{n+nb}{zip}\PY{p}{(}\PY{n}{means}\PY{p}{,} \PY{n}{covariances}\PY{p}{,} \PY{n}{colors}\PY{p}{)}\PY{p}{)}\PY{p}{:}
+        \PY{n}{v}\PY{p}{,} \PY{n}{w} \PY{o}{=} \PY{n}{linalg}\PY{o}{.}\PY{n}{eigh}\PY{p}{(}\PY{n}{covar}\PY{p}{)}
+        \PY{n}{v} \PY{o}{=} \PY{l+m+mf}{2.} \PY{o}{*} \PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{l+m+mf}{2.}\PY{p}{)} \PY{o}{*} \PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{n}{v}\PY{p}{)}
+        \PY{n}{u} \PY{o}{=} \PY{n}{w}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]} \PY{o}{/} \PY{n}{linalg}\PY{o}{.}\PY{n}{norm}\PY{p}{(}\PY{n}{w}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{} Plot data}
+        \PY{n}{ax}\PY{o}{.}\PY{n}{scatter}\PY{p}{(}\PY{n}{X}\PY{p}{[}\PY{n}{Y\PYZus{}pred} \PY{o}{==} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{X}\PY{p}{[}\PY{n}{Y\PYZus{}pred} \PY{o}{==} \PY{n}{i}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{n}{color}\PY{p}{,} \PY{n}{label}\PY{o}{=}\PY{n}{i}\PY{p}{,} \PY{n}{marker}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{o}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{} Plot centers}
+        \PY{n}{ax}\PY{o}{.}\PY{n}{scatter}\PY{p}{(}\PY{n}{mean}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{mean}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{s}\PY{o}{=}\PY{l+m+mi}{300}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{n}{color}\PY{p}{,} \PY{n}{marker}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{+}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{c+c1}{\PYZsh{} Plot ellipses to show the Gaussian component}
+        \PY{n}{angle} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{arctan}\PY{p}{(}\PY{n}{u}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]} \PY{o}{/} \PY{n}{u}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)}
+        \PY{n}{angle} \PY{o}{=} \PY{l+m+mf}{180.} \PY{o}{*} \PY{n}{angle} \PY{o}{/} \PY{n}{np}\PY{o}{.}\PY{n}{pi}  \PY{c+c1}{\PYZsh{} convert to degrees}
+        \PY{n}{color\PYZus{}rgba} \PY{o}{=} \PY{n}{pltcolors}\PY{o}{.}\PY{n}{to\PYZus{}rgba}\PY{p}{(}\PY{n}{color}\PY{p}{)}
+        \PY{k}{for} \PY{n}{cov\PYZus{}factor} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{4}\PY{p}{)}\PY{p}{:}
+            \PY{n}{ell} \PY{o}{=} \PY{n}{Ellipse}\PY{p}{(}\PY{n}{xy}\PY{o}{=}\PY{n}{mean}\PY{p}{,} 
+                          \PY{n}{width}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{n}{v}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{)} \PY{o}{*} \PY{n}{cov\PYZus{}factor}\PY{p}{,} 
+                          \PY{n}{height}\PY{o}{=}\PY{n}{np}\PY{o}{.}\PY{n}{sqrt}\PY{p}{(}\PY{n}{v}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{)} \PY{o}{*} \PY{n}{cov\PYZus{}factor}\PY{p}{,}
+                          \PY{n}{angle}\PY{o}{=}\PY{l+m+mf}{180.} \PY{o}{+} \PY{n}{angle}\PY{p}{,} \PY{n}{color}\PY{o}{=}\PY{n}{color}\PY{p}{,} \PY{n}{linewidth}\PY{o}{=}\PY{o}{.}\PY{l+m+mi}{4}\PY{p}{)}
+            \PY{n}{ell}\PY{o}{.}\PY{n}{set\PYZus{}facecolor}\PY{p}{(}\PY{p}{(}\PY{n}{color\PYZus{}rgba}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,} \PY{n}{color\PYZus{}rgba}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} \PY{n}{color\PYZus{}rgba}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{l+m+mf}{1.0} \PY{o}{/} \PY{p}{(}\PY{n}{cov\PYZus{}factor} \PY{o}{*} \PY{l+m+mf}{4.5}\PY{p}{)}\PY{p}{)}\PY{p}{)}
+            \PY{n}{ax}\PY{o}{.}\PY{n}{add\PYZus{}artist}\PY{p}{(}\PY{n}{ell}\PY{p}{)}
+    \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Component 1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Component 2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{ax}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{n}{loc}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{best}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+    \PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}title}\PY{p}{(}\PY{n}{title}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} Original label for data}
+\PY{n}{fig}\PY{p}{,} \PY{n}{axs} \PY{o}{=} \PY{n}{plt}\PY{o}{.}\PY{n}{subplots}\PY{p}{(}\PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{,} \PY{n}{figsize}\PY{o}{=}\PY{p}{(}\PY{l+m+mi}{15}\PY{p}{,} \PY{l+m+mi}{10}\PY{p}{)}\PY{p}{,} \PY{n}{facecolor}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{w}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{edgecolor}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{k}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{ax} \PY{o}{=} \PY{n}{axs}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}
+\PY{n}{labels} \PY{o}{=} \PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Kama}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Rosa}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Canadian}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}
+\PY{n}{el\PYZus{}per\PYZus{}label} \PY{o}{=} \PY{l+m+mi}{70}
+\PY{k}{for} \PY{n}{i} \PY{o+ow}{in} \PY{n+nb}{range}\PY{p}{(}\PY{l+m+mi}{3}\PY{p}{)}\PY{p}{:}
+    \PY{n}{ax}\PY{o}{.}\PY{n}{scatter}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{[}\PY{n}{i}\PY{o}{*}\PY{n}{el\PYZus{}per\PYZus{}label}\PY{p}{:}\PY{p}{(}\PY{n}{i}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{*}\PY{n}{el\PYZus{}per\PYZus{}label}\PY{p}{,}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}
+               \PY{n}{X\PYZus{}transformedPCA}\PY{p}{[}\PY{n}{i}\PY{o}{*}\PY{n}{el\PYZus{}per\PYZus{}label}\PY{p}{:}\PY{p}{(}\PY{n}{i}\PY{o}{+}\PY{l+m+mi}{1}\PY{p}{)}\PY{o}{*}\PY{n}{el\PYZus{}per\PYZus{}label}\PY{p}{,}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,} 
+               \PY{n}{color}\PY{o}{=}\PY{n}{colors}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{,}
+               \PY{n}{label}\PY{o}{=}\PY{n}{labels}\PY{p}{[}\PY{n}{i}\PY{p}{]}\PY{p}{)}
+\PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}xlabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Component 1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}ylabel}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Component 2}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{ax}\PY{o}{.}\PY{n}{legend}\PY{p}{(}\PY{n}{loc}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{best}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{ax}\PY{o}{.}\PY{n}{set\PYZus{}title}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Original labels}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} GMM prep k=2}
+\PY{n}{ax} \PY{o}{=} \PY{n}{axs}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}
+\PY{n}{plot\PYZus{}results}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{,} \PY{n}{gmm\PYZus{}pred}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{means\PYZus{}}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{o}{.}\PY{n}{covariances\PYZus{}}\PY{p}{,} \PY{n}{ax}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZdl{}K=2\PYZdl{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} GMM prep k=3}
+\PY{n}{ax} \PY{o}{=} \PY{n}{axs}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{0}\PY{p}{]}
+\PY{n}{plot\PYZus{}results}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{,} \PY{n}{gmm\PYZus{}pred}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{o}{.}\PY{n}{means\PYZus{}}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{o}{.}\PY{n}{covariances\PYZus{}}\PY{p}{,} \PY{n}{ax}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZdl{}K=3\PYZdl{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+
+\PY{c+c1}{\PYZsh{} GMM prep k=4}
+\PY{n}{ax} \PY{o}{=} \PY{n}{axs}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{]}
+\PY{n}{plot\PYZus{}results}\PY{p}{(}\PY{n}{X\PYZus{}transformedPCA}\PY{p}{,} \PY{n}{gmm\PYZus{}pred}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{o}{.}\PY{n}{means\PYZus{}}\PY{p}{,} \PY{n}{gmm}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{o}{.}\PY{n}{covariances\PYZus{}}\PY{p}{,} \PY{n}{ax}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{\PYZdl{}K=4\PYZdl{}}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+\PY{n}{plt}\PY{o}{.}\PY{n}{show}\PY{p}{(}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+\begin{center}
+    \adjustimage{max size={0.99\linewidth}{0.99\paperheight}}{output_21_0}
+    \begin{figure}[h!]
+    \caption{Confronto visivo tra i tre modelli ottenuti e il dataset originale, dopo il preprocessing con PCA.}
+   	\end{figure}
+\end{center}
+    
+    L'analisi visiva è sicuramente più intuitiva rispetto ai numeri. Vediamo
+rappresentati quattro grafici: il primo, solo di riferimento, mostra le
+label originali del dataset, mentre gli altri mostrano come l'algoritmo
+ha strutturato i nostri dati con \(K=2,3,4\).
+
+Possiamo notare, come principale differenza tra i modelli, che il
+cluster \(K=3\) è l'unico ad avere un numero di dati che, già ad occhio,
+è simile in tutti e 3 cluster creati, e le gaussiane sviluppate sono
+molto circolari, più che ellittiche, come invece risultano negli altri
+modelli (in particolare in \(K=2\)).
+
+I cluster ottenuti sono buoni, in particolare quelli di \(K=2,3\) erano
+cluster che si immaginava di ottenere già dal primo plot dei dati
+trasformati con PCA. Tra quelli di \(K=4\), il cluster \(3\) poteva essere
+inaspettato in prima analisi. Avendo il grafico delle label
+originali, vediamo che quel cluster indica in realtà un misto tra Kama e
+Rosa in zone lontane da dove sono principalmente concentrati i
+dati. Sarebbe interessante capire se questi dati possono essere
+considerati outliers per Kama e Rosa, ma non faremo questa analisi.
+
+Notiamo, di nuovo precisando che non è lo scopo della nostra analisi,
+che i cluster ottenuti con \(K=3\) si avvicinano molto alle label
+originali e calcolando lo stesso valore percentuale dell'analisi senza
+PCA otteniamo
+
+    \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
+\prompt{In}{incolor}{12}{\boxspacing}
+\begin{Verbatim}[commandchars=\\\{\}]
+\PY{c+c1}{\PYZsh{}print(D[:,7],\PYZsq{}\PYZbs{}n\PYZsq{},gmm\PYZus{}pred[3]) \PYZsh{}commentato per leggibilità}
+\PY{c+c1}{\PYZsh{}dal comando si vede la corrispondenza di cluster\PYZhy{}\PYZgt{}label: 0\PYZhy{}\PYZgt{}2, 1\PYZhy{}\PYZgt{}3, 2\PYZhy{}\PYZgt{}1}
+\PY{c+c1}{\PYZsh{}mappiamo quindi i risultati}
+\PY{n}{res} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{copy}\PY{p}{(}\PY{n}{gmm\PYZus{}pred}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{)}
+\PY{n}{replacements} \PY{o}{=} \PY{p}{\PYZob{}}\PY{l+m+mi}{0}\PY{p}{:} \PY{l+m+mi}{2}\PY{p}{,} \PY{l+m+mi}{1}\PY{p}{:} \PY{l+m+mi}{3}\PY{p}{,} \PY{l+m+mi}{2}\PY{p}{:} \PY{l+m+mi}{1}\PY{p}{\PYZcb{}}
+\PY{n}{new} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{zeros}\PY{p}{(}\PY{n}{res}\PY{o}{.}\PY{n}{shape}\PY{p}{)}
+\PY{k}{for} \PY{n}{idx}\PY{p}{,} \PY{n}{e} \PY{o+ow}{in} \PY{n}{replacements}\PY{o}{.}\PY{n}{items}\PY{p}{(}\PY{p}{)}\PY{p}{:}
+    \PY{n}{new}\PY{p}{[}\PY{n}{res} \PY{o}{==} \PY{n}{idx}\PY{p}{]} \PY{o}{=} \PY{n}{e}
+
+\PY{c+c1}{\PYZsh{}calcolo del numero di elementi uguali}
+\PY{n}{eq} \PY{o}{=} \PY{n}{np}\PY{o}{.}\PY{n}{where}\PY{p}{(}\PY{n}{new} \PY{o}{==} \PY{n}{D}\PY{p}{[}\PY{p}{:}\PY{p}{,}\PY{l+m+mi}{7}\PY{p}{]}\PY{p}{,} \PY{l+m+mf}{1.}\PY{p}{,} \PY{l+m+mf}{0.}\PY{p}{)}
+\PY{n}{ratio\PYZus{}correct} \PY{o}{=} \PY{n}{eq}\PY{o}{.}\PY{n}{sum}\PY{p}{(}\PY{p}{)}\PY{o}{/}\PY{n}{eq}\PY{o}{.}\PY{n}{shape}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+\PY{n+nb}{print}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Ratio of cluster elements of same seed kind:}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{ratio\PYZus{}correct}\PY{p}{)}
+\end{Verbatim}
+\end{tcolorbox}
+
+    \begin{Verbatim}[commandchars=\\\{\}]
+Ratio of cluster elements of same seed kind: 0.9142857142857143
+    \end{Verbatim}
+
+    La percentuale di cluster con semi dello stesso tipo è ancora molto alta
+e raggiunge il \(91.4\%\), nonostante la semplificazione del problema
+tramite PCA.
+
+Tengo a ripetere che noi non siamo a conoscenza delle label originali in
+un approccio unsupervised, ma la similiarità con le label classificate
+vuole essere un esempio di come, se applichiamo unsupervised learning su
+dati che non conosciamo, possiamo ottenere strutture tra i dati che ci
+permettono di avere delle ottime basi per fare successive analisi. Tengo
+a precisare anche che, con i cluster ottenuti, siamo in grado di
+generare nuovi dati, grazie alle gaussiane, che possiamo usare come dati
+artificiali per allenare algoritmi che richiedono grandi quantitativi di
+dati come, ad esempio, le reti neurali.
+
+\section{Considerazioni finali}\label{considerazioni-finali}
+
+La semplicità e l'espressività del modello finale sono la forza delle
+GMM. Utilizzare un algoritmo simile al posto dell'usuale \(K\)-means ha
+poco prezzo aggiuntivo, può dare ottime indicazioni su dove muoversi
+nelle fasi successive e ci permette di avere un modello in grado di
+generare dati plausibili e, si sa, i dati non bastano mai in questo
+ambito.
+
+\clearpage
+\nocite{*}
+\bibliographystyle{plain}
+\bibliography{GMM}
+
+\end{document}
