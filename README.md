@@ -22,5 +22,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## References
 - Christopher M. Bishop. *Pattern Recognition and Machine Learning (Information Science and Statistics)*. Springer-Verlag, Berlin, Heidelberg, 2006.
 - Oscar Contreras Carrasco. ”[Gaussian Mixture Models Explained](https://towardsdatascience.com/gaussian-mixture-models-explained-6986aaf5a95)".
-- M. Charytanowicz, J. Niewczas, P. Kulczycki, P.A. Kowalski, S. Lukasik, and S. Zak. ”AComplete Gradient Clustering Algorithm for Features Analysis of X-ray Images”. *Information Technologies in Biomedicine, Ewa Pietka, Jacek Kawa (eds.)*, 2010.
+- M. Charytanowicz, J. Niewczas, P. Kulczycki, P.A. Kowalski, S. Lukasik, and S. Zak. ”A Complete Gradient Clustering Algorithm for Features Analysis of X-ray Images”. *Information Technologies in Biomedicine, Ewa Pietka, Jacek Kawa (eds.)*, 2010.
 - Daniel Foley. ”[Gaussian Mixture Modelling (GMM)](https://towardsdatascience.com/gaussian-mixture-modelling-gmm-833c88587c7f)".

@@ -4,6 +4,7 @@
 # .gitignore and README.md are to be spared
 !.gitignore
 !README.md
+!LICENSE.md
 # anything that is a dir
 !*/
 
